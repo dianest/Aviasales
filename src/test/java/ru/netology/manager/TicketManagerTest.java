@@ -6,7 +6,10 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import ru.netology.domain.Ticket;
+import ru.netology.domain.TicketByFlightTimeAscComparator;
 import ru.netology.repository.TicketRepository;
+
+import java.util.Comparator;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.mockito.Mockito.doNothing;
@@ -14,6 +17,7 @@ import static org.mockito.Mockito.doReturn;
 
 @ExtendWith(MockitoExtension.class)
 public class TicketManagerTest {
+  private Comparator<Ticket> comparator = new TicketByFlightTimeAscComparator();
   @Mock
   private TicketRepository repository;
   @InjectMocks
@@ -75,5 +79,38 @@ public class TicketManagerTest {
     Ticket[] expected = new Ticket[]{fifth, first, eleventh, ninth};
     assertArrayEquals(expected, manager.findAll("AMS", "LED"));
   }
+  @Test
+  public void findAllEmptyComparator(){
+    Ticket[] returned = new Ticket[]{};
+    doReturn(returned).when(repository).findAll();
+    Ticket[] expected = new Ticket[]{};
+    assertArrayEquals(expected, manager.findAll("NEW", "OLD", comparator));
+  }
+
+
+  @Test
+  public void findAllNoneComparator(){
+    Ticket[] returned = new Ticket[]{fifth, second, third, eighth};
+    doReturn(returned).when(repository).findAll();
+    Ticket[] expected = new Ticket[]{};
+    assertArrayEquals(expected, manager.findAll("NEW", "OLD", comparator));
+  }
+
+  @Test
+  public void findAllOneComparator(){
+    Ticket[] returned = new Ticket[]{fifth, second, third, eighth};
+    doReturn(returned).when(repository).findAll();
+    Ticket[] expected = new Ticket[]{third};
+    assertArrayEquals(expected, manager.findAll("DME", "LED", comparator));
+  }
+
+  @Test
+  public void findAllSeveralComparator(){
+    Ticket[] returned = new Ticket[]{first, second, fifth, ninth, tenth, eleventh};
+    doReturn(returned).when(repository).findAll();
+    Ticket[] expected = new Ticket[]{fifth, first, eleventh, ninth};
+    assertArrayEquals(expected, manager.findAll("AMS", "LED", comparator));
+  }
+
 
 }
